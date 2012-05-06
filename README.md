@@ -26,11 +26,8 @@ always goes to the Graph API url and optionally includes an access token.
 Also, since Graph API are JSON, all responses are parsed into a
 map[string]interface{}. 
 
-The facebook/oauth package provides tools for handling access_tokens and
-signed_requests.
-
-The facebook/test_users package provides tools for manipulating test user
-accounts.
+There are also tools for handling access_tokens, signed_requests, and managing
+test user accounts.
 
 ## License
 
