@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -65,6 +66,15 @@ func jsonRequest(method string, id string, values url.Values, body io.Reader) (r
 	return
 }
 
+func (resp Response) Error () (err error) {
+	if resp["error"] == nil {
+		return nil
+	}
+
+	fbError := resp["error"].(map[string]interface {})
+	return fmt.Errorf("Facebook Error (%v): %v", fbError["code"], fbError["message"])
+}
+
 func Get(id string, values url.Values) (resp Response, err error) {
 	return AccessToken("").Get(id, values)
 }
@@ -116,6 +126,23 @@ func (app Application) ParseSignedRequest(r string) (parsed Response, err error)
 	}
 
 	return
+}
+
+func (app Application) TestUsers() (users []Response, err error) {
+	resp, err := app.AppToken.Get("/" + app.Id + "/accounts/test-users", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Error() != nil {
+		return nil, resp.Error()
+	}
+
+	for _, user := range resp["data"].([]interface {}) {
+		users = append(users, Response(user.(map[string]interface {})))
+	}
+
+	return 
 }
 
 func (app Application) CreateTestUser(values url.Values) (user Response, err error) {

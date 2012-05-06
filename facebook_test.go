@@ -35,13 +35,18 @@ func getTestUser(t *testing.T) (user Response) {
 	if testUser != nil {
 		return testUser
 	}
+	app := getTestApp(t)
 
-	user, err :=  getTestApp(t).CreateTestUser(nil)
+	users, err := app.TestUsers()
 	if err != nil {
-		t.Fatalf("Unable to create a test user: %q", err)
+		t.Fatalf("Unable to get test users: %q (Response: %v)", err, users)
 	}
 
-	testUser = user
+	if len(users) == 0 {
+		t.Fatalf("Please create a test user to run these tests.")
+	}
+
+	testUser = users[0]
 	return testUser
 }
 
@@ -57,6 +62,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestCreateTestUser(t *testing.T) {
-	t.Logf("%v", getTestUser(t))
+	user := getTestUser(t)
+	t.Logf("%v", user)
 }
 
