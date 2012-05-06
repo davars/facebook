@@ -1,0 +1,6 @@
+{
+	"Id": "1234",
+	"Secret": "5678",
+	"Namespace": "myapp",
+	"AppToken": "1234|abcde"
+}
