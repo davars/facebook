@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
     "os"
     "path"
+    "regexp"
     "testing"
 )
 
@@ -42,27 +43,76 @@ func getTestUser(t *testing.T) (user Response) {
 		t.Fatalf("Unable to get test users: %q (Response: %v)", err, users)
 	}
 
-	if len(users) == 0 {
-		t.Fatalf("Please create a test user to run these tests.")
+	for _, user := range users {
+		if Map(user)["access_token"] != nil {
+			testUser = user
+			break
+		}
+	}
+	if testUser == nil {
+		t.Fatalf("Please create a test user that has authorized your app to run these tests.")
 	}
 
-	testUser = users[0]
 	return testUser
+}
+
+func checkFatal(t *testing.T, err error) {
+	if err != nil {
+		t.Fatalf("Failed: %q", err)
+	}
 }
 
 func TestGet(t *testing.T) {
 	app := getTestApp(t)
 	resp, err := Get("/" + string(app.Id), nil)
-	if(err != nil) {
+	if err != nil {
 		t.Fatalf("Get failed: %q", err)
 	}
-	if resp["id"] != app.Id {
-		t.Errorf("Got the wrong id from the Graph Api (this should never happen).  Expected %q,  got %q. (Response: %q)", app.Id, resp["id"], resp)
+	if resp.(Map)["id"] != app.Id {
+		t.Errorf("Got the wrong id from the Graph Api (this should never happen).  Expected %q,  got %q. (Response: %q)", app.Id, resp.(Map)["id"], resp)
 	}
 }
 
-func TestCreateTestUser(t *testing.T) {
+func TestGetWithToken(t *testing.T) {
 	user := getTestUser(t)
-	t.Logf("%v", user)
+	resp, err := AccessToken(user.(Map)["access_token"].(string)).Get("/me", nil)
+	if err != nil {
+		t.Fatalf("Get failed: %q", err)
+	}
+	if resp.(Map)["id"] != user.(Map)["id"] {
+		t.Errorf("Got the wrong id from the Graph Api (this should never happen).  Expected %q,  got %q. (Response: %q)", user.(Map)["id"], resp.(Map)["id"], resp)
+	}
+}
+
+func TestCreateAndDeleteAndListTestUser(t *testing.T) {
+	if !testing.Short() {
+		app := getTestApp(t)
+		user, err := app.CreateTestUser(nil)
+		if err != nil {
+			t.Fatalf("CreateTestUser failed: %q", err)
+		}
+		t.Logf("User created: %v", user)
+
+		matches, err := regexp.MatchString("test_account_login", user["login_url"].(string))
+		if err != nil {
+			t.Fatalf("Regexp failed: %q", err)
+		}
+		if !matches {
+			t.Errorf("Unexpected value for login_url %q", user["login_url"])
+		}
+
+		success, err := app.DeleteTestUser(user["id"].(string))
+		if err != nil || !bool(success) {
+			t.Errorf("Unable to delete test user: %q", err)
+		}
+
+		testUserList, err := app.TestUsers()
+
+		for _, testUser := range testUserList {
+			if user["id"] == testUser["id"] {
+				t.Errorf("Test user not successfully deleted: %v", user)
+			}
+		}	
+	}
 }
 
