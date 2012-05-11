@@ -19,11 +19,12 @@ type Application struct {
 type AccessToken string
 
 type Response interface {
-	Error () error
+	Error() error
 }
 
-type Map map[string]interface {}
-func (resp Map) Error () (err error) {
+type Map map[string]interface{}
+
+func (resp Map) Error() (err error) {
 	if resp["error"] == nil {
 		return nil
 	}
@@ -48,7 +49,8 @@ func checkMap(resp Response, inErr error) (m Map, outErr error) {
 }
 
 type Bool bool
-func (resp Bool) Error () (err error) {
+
+func (resp Bool) Error() (err error) {
 	return nil
 }
 
@@ -77,6 +79,7 @@ func pad64(s string) string {
 }
 
 const GRAPH_API = "https://graph.facebook.com"
+
 func graphRequest(method string, id string, values url.Values, body io.Reader) (r *http.Response, err error) {
 	url := GRAPH_API + id + "?" + values.Encode()
 
@@ -90,22 +93,22 @@ func graphRequest(method string, id string, values url.Values, body io.Reader) (
 
 func jsonRequest(method string, id string, values url.Values, body io.Reader) (resp Response, err error) {
 	r, err := graphRequest(method, id, values, body)
-	if(r != nil) {
-		defer r.Body.Close()	
+	if r != nil {
+		defer r.Body.Close()
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	var decoded interface {}
+	var decoded interface{}
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&decoded)
 	if err != nil {
 		return nil, fmt.Errorf("JSON Decode failed: %q", err)
 	}
 
-	if _, ok := decoded.(map[string]interface {}); ok {
-		return Map(decoded.(map[string]interface {})), nil
+	if _, ok := decoded.(map[string]interface{}); ok {
+		return Map(decoded.(map[string]interface{})), nil
 	}
 
 	if _, ok := decoded.(bool); ok {

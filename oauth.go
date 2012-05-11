@@ -63,7 +63,7 @@ func (app Application) AccessToken(values url.Values) (response url.Values, err 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, err

@@ -2,15 +2,15 @@ package facebook
 
 import (
 	"net/url"
-    "testing"
-    "testing/quick"
+	"testing"
+	"testing/quick"
 )
 
 func TestAccessToken(t *testing.T) {
 	app := getTestApp(t)
-	values, err := app.AccessToken(url.Values {"grant_type": []string{"client_credentials"}})
+	values, err := app.AccessToken(url.Values{"grant_type": []string{"client_credentials"}})
 	checkFatal(t, err)
-	
+
 	if AccessToken(values["access_token"][0]) != app.AppToken {
 		t.Fatalf("access_tokens don't match")
 	}
@@ -29,7 +29,7 @@ func TestParseValidSignedRequest(t *testing.T) {
 	for k, v := range example_data {
 		if parsed[k].(string) != v {
 			t.Errorf("Incorrect request content, expected %q, got %q", v, parsed[k])
-		}	
+		}
 	}
 }
 
@@ -45,7 +45,7 @@ func TestQuickCheckParseSignedRequest(t *testing.T) {
 		}
 		return true
 	}
-	
+
 	if err := quick.Check(f, nil); err != nil {
 		t.Error(err)
 	}
