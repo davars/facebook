@@ -41,8 +41,7 @@ func checkMap(resp Response, inErr error) (m Map, outErr error) {
 	if resp.Error() != nil {
 		return nil, resp.Error()
 	}
-	m, ok := resp.(Map)
-	if !ok {
+	if m, ok := resp.(Map); !ok {
 		return m, fmt.Errorf("Expected a JSON map, got %q instead", resp)
 	}
 	return
