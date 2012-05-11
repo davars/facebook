@@ -12,11 +12,21 @@ import (
 )
 
 func (app Application) ParseSignedRequest(r string) (parsed Map, err error) {
+	var malformed = errors.New("Malformed Signed Request")
+
 	parts := strings.Split(r, ".")
+	if len(parts) != 2 {
+		return nil, malformed
+	}
+	for _, part := range parts {
+		if part == "" {
+			return nil, malformed
+		}
+	}
 
 	payload, err := base64.URLEncoding.DecodeString(pad64(parts[1]))
 	if err != nil {
-		return nil, errors.New("Malformed Signed Request")
+		return nil, malformed
 	}
 
 	err = json.Unmarshal(payload, &parsed)
@@ -40,9 +50,9 @@ func (app Application) ParseSignedRequest(r string) (parsed Map, err error) {
 	return
 }
 
-func (app Application) AccessToken(values url.Values) (response string, err error) {
+func (app Application) AccessToken(values url.Values) (response url.Values, err error) {
 	if values == nil {
-		return "", errors.New("Missing extra form paramters, perhaps redirect_uri or grant_type?")
+		return nil, errors.New("Missing extra form paramters, perhaps redirect_uri or grant_type?")
 	}
 	values.Add("client_id", app.Id)
 	values.Add("client_secret", app.Secret)
@@ -51,13 +61,13 @@ func (app Application) AccessToken(values url.Values) (response string, err erro
 		defer r.Body.Close()
 	}
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(data), nil
+	return url.ParseQuery(string(data))
 }
