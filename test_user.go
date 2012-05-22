@@ -9,7 +9,7 @@ func (app Application) TestUsers() (users []Map, err error) {
 	if err != nil {
 		return
 	}
-	
+
 	for _, user := range resp["data"].([]interface{}) {
 		users = append(users, Map(user.(map[string]interface{})))
 	}
