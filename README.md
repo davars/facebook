@@ -1,7 +1,8 @@
 ## Overview
 
-facebook.go facilitates writing Go programs that integrate with Facebook.  Also, this
-README is inaccurate and describes features not yet implemented.
+facebook.go facilitates writing Go programs that integrate with Facebook.  
+This package is at a very early stage of development.  Also, this README is 
+inaccurate and possibly describes features not yet implemented.
 
 ## Documentation
 
