@@ -4,10 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 )
+
+var Logger *log.Logger
+
+func printf(fmt string, v ...interface{}) {
+	if Logger != nil {
+		Logger.Printf(fmt, v...)
+	}
+}
 
 type Application struct {
 	Id        string
@@ -29,7 +38,7 @@ func (resp Map) Error() (err error) {
 		return nil
 	}
 
-	fbError := resp["error"].(Map)
+	fbError := Map(resp["error"].(map[string]interface{}))
 	return fmt.Errorf("Facebook Error (%v): %v", fbError["code"], fbError["message"])
 }
 
@@ -41,7 +50,8 @@ func checkMap(resp Response, inErr error) (m Map, outErr error) {
 	if resp.Error() != nil {
 		return nil, resp.Error()
 	}
-	if m, ok := resp.(Map); !ok {
+	m, ok := resp.(Map)
+	if !ok {
 		return m, fmt.Errorf("Expected a JSON map, got %q instead", resp)
 	}
 	return

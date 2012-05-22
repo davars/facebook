@@ -3,6 +3,7 @@ package facebook
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"regexp"
@@ -11,11 +12,11 @@ import (
 
 var testApp *Application
 
-func getTestApp(t *testing.T) (app *Application) {
-	if testApp != nil {
-		return testApp
-	}
+func init() {
+	Logger = log.New(os.Stdout, "", log.LstdFlags)
+}
 
+func getTestApp(t *testing.T) (app *Application) {
 	filename := path.Join(path.Join(os.Getenv("PWD"), "tests"), "fb_app.json")
 	config, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -84,6 +85,14 @@ func TestGetWithToken(t *testing.T) {
 	if resp.(Map)["id"] != user.(Map)["id"] {
 		t.Errorf("Got the wrong id from the Graph Api (this should never happen).  Expected %q,  got %q. (Response: %q)", user.(Map)["id"], resp.(Map)["id"], resp)
 	}
+}
+
+func TestGetAccessDenied(t *testing.T) {
+	resp, err := checkMap(Get("/me", nil))
+	if err == nil {
+		t.Fatalf("Expected access denied, got %q instead", resp)
+	}
+	t.Logf("Successfully got error: %q", err.Error())
 }
 
 func TestCreateAndDeleteAndListTestUser(t *testing.T) {

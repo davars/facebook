@@ -6,7 +6,10 @@ import (
 
 func (app Application) TestUsers() (users []Map, err error) {
 	resp, err := checkMap(app.AppToken.Get("/"+app.Id+"/accounts/test-users", nil))
-
+	if err != nil {
+		return
+	}
+	
 	for _, user := range resp["data"].([]interface{}) {
 		users = append(users, Map(user.(map[string]interface{})))
 	}
