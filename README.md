@@ -1,3 +1,7 @@
+# Deprecated (2016-05-01)
+
+I never built anything with this.  You probably shouldn't either.
+
 ## Overview
 
 facebook.go facilitates writing Go programs that integrate with Facebook.  
